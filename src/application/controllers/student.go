@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/felipedavid/vrcursos/src/core/domain"
 	"github.com/felipedavid/vrcursos/src/core/domain/usecase"
 	"github.com/felipedavid/vrcursos/src/core/helper"
 	"github.com/felipedavid/vrcursos/src/infrastructure/repository"
@@ -55,9 +56,16 @@ func (c *StudentController) StudentCreate(res http.ResponseWriter, req *http.Req
 }
 
 func (c *StudentController) StudentList(res http.ResponseWriter, req *http.Request) {
-	students, err := c.studentUsecase.GetStudents(context.Background())
+	search := req.URL.Query().Get("search")
+
+	students, err := c.studentUsecase.GetStudents(context.Background(), search)
 	if err != nil {
-		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
+		switch {
+		case err == domain.ErrStudentNotFound:
+			helper.MessageResponse(res, req, http.StatusNotFound, err.Error())
+		default:
+			helper.MessageResponse(res, req, http.StatusInternalServerError, "internal server error")
+		}
 		return
 	}
 

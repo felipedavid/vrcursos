@@ -8,7 +8,7 @@ import (
 
 type IStudentRepository interface {
 	Save(ctx context.Context, student *model.Student) error
-	GetStudents(ctx context.Context) ([]*model.Student, error)
+	GetStudents(ctx context.Context, search string) ([]*model.Student, error)
 	GetStudent(ctx context.Context, id int) (*model.Student, error)
 	UpdateStudent(ctx context.Context, student *model.Student) error
 	DeleteStudent(ctx context.Context, id int) error

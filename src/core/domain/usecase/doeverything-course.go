@@ -67,6 +67,7 @@ func (u *courseUsecase) GetCourse(ctx context.Context, id int) (*GetCourseOutput
 		return nil, err
 	}
 
+	// TODO: Refactor this in only a single query
 	nStudentsEnrolled, err := u.courseRepository.HowManyEnrolled(ctx, id)
 	if err != nil {
 		return nil, err

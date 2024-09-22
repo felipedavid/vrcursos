@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/felipedavid/vrcursos/src/core/model"
 )
@@ -27,10 +29,25 @@ func (r PostgresStudentRepository) Save(ctx context.Context, student *model.Stud
 	return nil
 }
 
-func (r PostgresStudentRepository) GetStudents(ctx context.Context) ([]*model.Student, error) {
+func (r PostgresStudentRepository) GetStudents(ctx context.Context, search string) ([]*model.Student, error) {
 	query := `SELECT id, name FROM student`
+	args := []any{}
 
-	rows, err := r.db.QueryContext(ctx, query)
+	if search != "" {
+		searchTerms := strings.Fields(search)
+
+		query += ` WHERE `
+		conditions := []string{}
+
+		for i, term := range searchTerms {
+			conditions = append(conditions, fmt.Sprintf("LOWER(UNACCENT(name)) ILIKE LOWER(UNACCENT($%d))", i+1))
+			args = append(args, "%"+term+"%")
+		}
+
+		query += strings.Join(conditions, " AND ")
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
