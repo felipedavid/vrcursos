@@ -14,7 +14,7 @@ type CreateCourseInput struct {
 
 type UpdateCourseInput struct {
 	Name        string `json:"name"`
-	Description string `json:"name"`
+	Description string `json:"description"`
 }
 
 type CourseUsecase interface {
@@ -23,6 +23,8 @@ type CourseUsecase interface {
 	GetCourses(ctx context.Context) ([]*model.Course, error)
 	UpdateCourse(ctx context.Context, id int, input UpdateCourseInput) (*model.Course, error)
 	DeleteCourse(ctx context.Context, id int) error
+	EnrollStudent(ctx context.Context, courseID, studentID int) error
+	UnenrollStudent(ctx context.Context, courseID, studentID int) error
 }
 
 type courseUsecase struct {
@@ -91,4 +93,22 @@ func (u *courseUsecase) GetCourses(ctx context.Context) ([]*model.Course, error)
 	}
 
 	return courses, nil
+}
+
+func (u *courseUsecase) EnrollStudent(ctx context.Context, courseID, studentID int) error {
+	err := u.courseRepository.AddStudentToCourse(ctx, courseID, studentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *courseUsecase) UnenrollStudent(ctx context.Context, courseID, studentID int) error {
+	err := u.courseRepository.RemoveStudentFromCourse(ctx, courseID, studentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

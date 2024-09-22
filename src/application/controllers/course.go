@@ -12,12 +12,12 @@ import (
 )
 
 type CourseController struct {
-	studentUsecase usecase.CourseUsecase
+	courseUsecase usecase.CourseUsecase
 }
 
 func NewCourseController(repo repository.ICourseRepository) *CourseController {
 	return &CourseController{
-		studentUsecase: usecase.NewCourseUsecase(repo),
+		courseUsecase: usecase.NewCourseUsecase(repo),
 	}
 }
 
@@ -28,7 +28,7 @@ func (c *CourseController) CourseGet(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	course, err := c.studentUsecase.GetCourse(context.Background(), id)
+	course, err := c.courseUsecase.GetCourse(context.Background(), id)
 	if err != nil {
 		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
 		return
@@ -45,7 +45,7 @@ func (c *CourseController) CourseCreate(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	_, err = c.studentUsecase.CreateCourse(context.Background(), input)
+	_, err = c.courseUsecase.CreateCourse(context.Background(), input)
 	if err != nil {
 		helper.MessageResponse(res, req, http.StatusInternalServerError, "internal server error")
 		return
@@ -55,7 +55,7 @@ func (c *CourseController) CourseCreate(res http.ResponseWriter, req *http.Reque
 }
 
 func (c *CourseController) CourseList(res http.ResponseWriter, req *http.Request) {
-	courses, err := c.studentUsecase.GetCourses(context.Background())
+	courses, err := c.courseUsecase.GetCourses(context.Background())
 	if err != nil {
 		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
 		return
@@ -78,7 +78,7 @@ func (c *CourseController) CourseUpdate(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	_, err = c.studentUsecase.UpdateCourse(context.Background(), id, input)
+	_, err = c.courseUsecase.UpdateCourse(context.Background(), id, input)
 	if err != nil {
 		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
 		return
@@ -94,11 +94,55 @@ func (c *CourseController) CourseDelete(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	err = c.studentUsecase.DeleteCourse(context.Background(), id)
+	err = c.courseUsecase.DeleteCourse(context.Background(), id)
 	if err != nil {
 		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
 		return
 	}
 
 	helper.WriteJSON(res, http.StatusOK, map[string]any{"message": "course deleted"}, nil)
+}
+
+func (c *CourseController) EnrollStudent(res http.ResponseWriter, req *http.Request) {
+	studentID, err := strconv.Atoi(req.PathValue("studentID"))
+	if err != nil {
+		helper.MessageResponse(res, req, http.StatusBadRequest, "invalid userID in url")
+		return
+	}
+
+	courseID, err := strconv.Atoi(req.PathValue("courseID"))
+	if err != nil {
+		helper.MessageResponse(res, req, http.StatusBadRequest, "invalid courseID in url")
+		return
+	}
+
+	err = c.courseUsecase.EnrollStudent(context.Background(), courseID, studentID)
+	if err != nil {
+		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
+		return
+	}
+
+	helper.MessageResponse(res, req, http.StatusOK, "student enrolled in the course successfully")
+}
+
+func (c *CourseController) UnenrollStudent(res http.ResponseWriter, req *http.Request) {
+	studentID, err := strconv.Atoi(req.PathValue("studentID"))
+	if err != nil {
+		helper.MessageResponse(res, req, http.StatusBadRequest, "invalid userID in url")
+		return
+	}
+
+	courseID, err := strconv.Atoi(req.PathValue("courseID"))
+	if err != nil {
+		helper.MessageResponse(res, req, http.StatusBadRequest, "invalid courseID in url")
+		return
+	}
+
+	err = c.courseUsecase.UnenrollStudent(context.Background(), courseID, studentID)
+	if err != nil {
+		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
+		return
+	}
+
+	helper.MessageResponse(res, req, http.StatusOK, "student unenrolled from the course successfully")
 }

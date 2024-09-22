@@ -1,0 +1,11 @@
+meta {
+  name: Unenroll student from course
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{url}}/enroll/student/:student_id/course/:course_id
+  body: none
+  auth: none
+}

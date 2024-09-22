@@ -21,5 +21,8 @@ func DefineRoutes(userControllers *controllers.StudentController, courseControll
 	mux.HandleFunc("PUT /courses/{id}", courseControllers.CourseUpdate)
 	mux.HandleFunc("DELETE /courses/{id}", courseControllers.CourseDelete)
 
+	mux.HandleFunc("POST /enroll/student/{studentID}/course/{courseID}", courseControllers.EnrollStudent)
+	mux.HandleFunc("DELETE /enroll/student/{studentID}/course/{courseID}", courseControllers.UnenrollStudent)
+
 	return mux
 }

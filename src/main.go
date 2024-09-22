@@ -8,7 +8,7 @@ import (
 
 	"github.com/felipedavid/vrcursos/src/application/controllers"
 	"github.com/felipedavid/vrcursos/src/application/routes"
-	"github.com/felipedavid/vrcursos/src/infrastructure/config"
+	"github.com/felipedavid/vrcursos/src/infrastructure/database"
 	"github.com/felipedavid/vrcursos/src/infrastructure/repository/postgres"
 	"github.com/joho/godotenv"
 )
@@ -46,13 +46,13 @@ func main() {
 
 // setupDatabase stablishes a connection to the database and runs the migrations
 func setupDatabase(databaseUrl string) *sql.DB {
-	db, err := config.ConnectToDatabase(databaseUrl)
+	db, err := database.ConnectToDatabase(databaseUrl)
 	if err != nil {
 		slog.Error("Unable to stablish database connection", "err", err)
 		os.Exit(-1)
 	}
 
-	err = config.RunUpMigrations(db, migrationsPath)
+	err = database.RunUpMigrations(db, migrationsPath)
 	if err != nil && err.Error() != "no change" {
 		slog.Error("Error while running migrations", "err", err)
 		os.Exit(-1)
