@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "vrcursos",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

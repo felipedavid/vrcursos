@@ -1,0 +1,17 @@
+meta {
+  name: Create student
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/students
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "felipe davi 15"
+  }
+}
