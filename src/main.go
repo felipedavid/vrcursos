@@ -30,11 +30,11 @@ func main() {
 
 	db := setupDatabase(databaseUrl)
 
-	userRepo := postgres.NewPostgresStudentRepository(db)
+	studentRepo := postgres.NewPostgresStudentRepository(db)
 	courseRepo := postgres.NewPostgresCourseRepository(db)
 
-	userControllers := controllers.NewStudentController(userRepo)
-	courseControllers := controllers.NewCourseController(courseRepo)
+	userControllers := controllers.NewStudentController(studentRepo)
+	courseControllers := controllers.NewCourseController(courseRepo, studentRepo)
 
 	routes := routes.DefineRoutes(userControllers, courseControllers)
 

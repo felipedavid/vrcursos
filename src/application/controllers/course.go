@@ -15,9 +15,9 @@ type CourseController struct {
 	courseUsecase usecase.CourseUsecase
 }
 
-func NewCourseController(repo repository.ICourseRepository) *CourseController {
+func NewCourseController(courseRepo repository.ICourseRepository, studentRepo repository.IStudentRepository) *CourseController {
 	return &CourseController{
-		courseUsecase: usecase.NewCourseUsecase(repo),
+		courseUsecase: usecase.NewCourseUsecase(courseRepo, studentRepo),
 	}
 }
 
@@ -118,7 +118,16 @@ func (c *CourseController) EnrollStudent(res http.ResponseWriter, req *http.Requ
 
 	err = c.courseUsecase.EnrollStudent(context.Background(), courseID, studentID)
 	if err != nil {
-		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
+		switch {
+		case err == usecase.ErrCourseFull:
+			helper.MessageResponse(res, req, http.StatusBadRequest, err.Error())
+		case err == usecase.ErrEnrolledTooManyCourses:
+			helper.MessageResponse(res, req, http.StatusBadRequest, err.Error())
+		case err == repository.ErrStudentAlreadyEnrolled:
+			helper.MessageResponse(res, req, http.StatusBadRequest, err.Error())
+		default:
+			helper.MessageResponse(res, req, http.StatusInternalServerError, "internal server error")
+		}
 		return
 	}
 
@@ -140,7 +149,7 @@ func (c *CourseController) UnenrollStudent(res http.ResponseWriter, req *http.Re
 
 	err = c.courseUsecase.UnenrollStudent(context.Background(), courseID, studentID)
 	if err != nil {
-		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
+		helper.MessageResponse(res, req, http.StatusInternalServerError, "internal server error")
 		return
 	}
 

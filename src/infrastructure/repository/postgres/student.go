@@ -87,3 +87,16 @@ func (r PostgresStudentRepository) DeleteStudent(ctx context.Context, id int) er
 
 	return nil
 }
+
+func (r PostgresStudentRepository) EnrolledInHowManyCourses(ctx context.Context, studentID int) (int, error) {
+	query := `SELECT COUNT(*) FROM enrollment WHERE student_id = $1`
+
+	row := r.db.QueryRowContext(ctx, query, studentID)
+
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}

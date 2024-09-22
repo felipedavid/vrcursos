@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/felipedavid/vrcursos/src/core/model"
+	"github.com/felipedavid/vrcursos/src/infrastructure/repository"
 )
 
 type PostgresCourseRepository struct {
@@ -93,6 +94,9 @@ func (r PostgresCourseRepository) AddStudentToCourse(ctx context.Context, course
 
 	_, err := r.db.ExecContext(ctx, query, courseID, studentID)
 	if err != nil {
+		if err.Error() == `pq: duplicate key value violates unique constraint "unique_student_course"` {
+			return repository.ErrStudentAlreadyEnrolled
+		}
 		return err
 	}
 

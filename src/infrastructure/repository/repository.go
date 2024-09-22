@@ -12,6 +12,7 @@ type IStudentRepository interface {
 	GetStudent(ctx context.Context, id int) (*model.Student, error)
 	UpdateStudent(ctx context.Context, student *model.Student) error
 	DeleteStudent(ctx context.Context, id int) error
+	EnrolledInHowManyCourses(ctx context.Context, studentID int) (int, error)
 }
 
 type ICourseRepository interface {
