@@ -58,7 +58,7 @@ func setupDatabase(databaseUrl string) *sql.DB {
 		os.Exit(-1)
 	}
 
-	if err.Error() != "no change" {
+	if err != nil && err.Error() != "no change" {
 		slog.Info("No migrations to apply, all migrations are up to date")
 	} else {
 		slog.Info("Migrations applied successfully!")

@@ -41,21 +41,20 @@ func (c *CourseController) CourseCreate(res http.ResponseWriter, req *http.Reque
 	input := usecase.CreateCourseInput{}
 	err := helper.ReadJSON(res, req, &input)
 	if err != nil {
-		fmt.Fprintf(res, "error reading request body")
+		helper.MessageResponse(res, req, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	_, err = c.studentUsecase.CreateCourse(context.Background(), input)
 	if err != nil {
-		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)
+		helper.MessageResponse(res, req, http.StatusInternalServerError, "internal server error")
 		return
 	}
 
-	helper.WriteJSON(res, http.StatusCreated, map[string]any{"message": "course created"}, nil)
+	helper.MessageResponse(res, req, http.StatusCreated, "course created")
 }
 
 func (c *CourseController) CourseList(res http.ResponseWriter, req *http.Request) {
-
 	courses, err := c.studentUsecase.GetCourses(context.Background())
 	if err != nil {
 		helper.WriteJSON(res, http.StatusInternalServerError, nil, nil)

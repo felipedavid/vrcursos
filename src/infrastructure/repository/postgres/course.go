@@ -16,9 +16,9 @@ func NewPostgresCourseRepository(db *sql.DB) *PostgresCourseRepository {
 }
 
 func (r PostgresCourseRepository) Save(ctx context.Context, course *model.Course) error {
-	query := `INSERT INTO course (description) VALUES ($1) RETURNING id`
+	query := `INSERT INTO course (description, name) VALUES ($1, $2) RETURNING id`
 
-	row := r.db.QueryRow(query, course.Description)
+	row := r.db.QueryRow(query, course.Description, course.Name)
 	err := row.Scan(&course.ID)
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (r PostgresCourseRepository) Save(ctx context.Context, course *model.Course
 }
 
 func (r PostgresCourseRepository) GetCourses(ctx context.Context) ([]*model.Course, error) {
-	query := `SELECT id, description FROM course`
+	query := `SELECT id, description, name FROM course`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
@@ -40,7 +40,7 @@ func (r PostgresCourseRepository) GetCourses(ctx context.Context) ([]*model.Cour
 
 	for rows.Next() {
 		var course model.Course
-		if err := rows.Scan(&course.ID, &course.Description); err != nil {
+		if err := rows.Scan(&course.ID, &course.Description, &course.Name); err != nil {
 			return nil, err
 		}
 
@@ -55,11 +55,11 @@ func (r PostgresCourseRepository) GetCourses(ctx context.Context) ([]*model.Cour
 }
 
 func (r PostgresCourseRepository) GetCourse(ctx context.Context, id int) (*model.Course, error) {
-	query := `SELECT id, description FROM course WHERE id = $1`
+	query := `SELECT id, description, name FROM course WHERE id = $1`
 
 	row := r.db.QueryRowContext(ctx, query, id)
 	var course model.Course
-	if err := row.Scan(&course.ID, &course.Description); err != nil {
+	if err := row.Scan(&course.ID, &course.Description, &course.Name); err != nil {
 		return nil, err
 	}
 
@@ -67,9 +67,9 @@ func (r PostgresCourseRepository) GetCourse(ctx context.Context, id int) (*model
 }
 
 func (r PostgresCourseRepository) UpdateCourse(ctx context.Context, course *model.Course) error {
-	query := `UPDATE course SET description = $1 WHERE id = $2`
+	query := `UPDATE course SET description = $1, name = $2 WHERE id = $3`
 
-	_, err := r.db.ExecContext(ctx, query, course.Description, course.ID)
+	_, err := r.db.ExecContext(ctx, query, course.Description, course.Name, course.ID)
 	if err != nil {
 		return err
 	}

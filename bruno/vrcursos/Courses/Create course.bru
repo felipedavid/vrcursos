@@ -6,6 +6,13 @@ meta {
 
 post {
   url: {{url}}/courses
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "name": "course 1",
+    "description": "the best course ever"
+  }
 }

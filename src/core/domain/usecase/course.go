@@ -8,10 +8,12 @@ import (
 )
 
 type CreateCourseInput struct {
-	Description string `json:"name"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type UpdateCourseInput struct {
+	Name        string `json:"name"`
 	Description string `json:"name"`
 }
 
@@ -35,6 +37,7 @@ func NewCourseUsecase(repo repository.ICourseRepository) CourseUsecase {
 
 func (u *courseUsecase) CreateCourse(ctx context.Context, input CreateCourseInput) (*model.Course, error) {
 	course := &model.Course{
+		Name:        input.Name,
 		Description: input.Description,
 	}
 
@@ -61,6 +64,7 @@ func (u *courseUsecase) UpdateCourse(ctx context.Context, id int, input UpdateCo
 		return nil, err
 	}
 
+	course.Name = input.Name
 	course.Description = input.Description
 
 	err = u.courseRepository.UpdateCourse(ctx, course)
