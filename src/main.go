@@ -1,48 +1,68 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"log/slog"
 	"net/http"
 	"os"
 
+	"github.com/felipedavid/vrcursos/src/application/controllers"
 	"github.com/felipedavid/vrcursos/src/application/routes"
-	"github.com/felipedavid/vrcursos/src/core/model"
 	"github.com/felipedavid/vrcursos/src/infrastructure/config"
 	"github.com/felipedavid/vrcursos/src/infrastructure/repository/postgres"
 	"github.com/joho/godotenv"
 )
 
+const (
+	migrationsPath = "file://migrations"
+)
+
 func main() {
+	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
 		slog.Error("Error loading .env file", "err", err)
-		return
+		os.Exit(-1)
 	}
 
 	addr := os.Getenv("ADDR")
 	databaseUrl := os.Getenv("DATABASE_URL")
 
-	db, err := config.ConnectToDatabase(databaseUrl)
-	if err != nil {
-		slog.Error("Unable to sablish database connection", "err", err)
-		return
-	}
+	db := setupDatabase(databaseUrl)
 
 	userRepo := postgres.NewPostgresStudentRepository(db)
+	courseRepo := postgres.NewPostgresCourseRepository(db)
 
-	err = userRepo.Save(context.Background(), &model.Student{
-		Name: "Felipe David",
-	})
-	if err != nil {
-		slog.Error("Unable to save user", "err", err)
-		return
-	}
+	userControllers := controllers.NewStudentController(userRepo)
+	courseControllers := controllers.NewCourseController(courseRepo)
 
-	mux := routes.DefineRoutes()
+	routes := routes.DefineRoutes(userControllers, courseControllers)
 
 	slog.Info("Starting web server", "addr", addr)
-	err = http.ListenAndServe(addr, mux)
-	slog.Error("Unable to start server", "err", err)
+	err = http.ListenAndServe(addr, routes)
+	slog.Error("Unable to start web server", "err", err)
 	os.Exit(-1)
+}
+
+// setupDatabase stablishes a connection to the database and runs the migrations
+func setupDatabase(databaseUrl string) *sql.DB {
+	db, err := config.ConnectToDatabase(databaseUrl)
+	if err != nil {
+		slog.Error("Unable to stablish database connection", "err", err)
+		os.Exit(-1)
+	}
+
+	err = config.RunUpMigrations(db, migrationsPath)
+	if err != nil && err.Error() != "no change" {
+		slog.Error("Error while running migrations", "err", err)
+		os.Exit(-1)
+	}
+
+	if err.Error() != "no change" {
+		slog.Info("No migrations to apply, all migrations are up to date")
+	} else {
+		slog.Info("Migrations applied successfully!")
+	}
+
+	return db
 }
