@@ -22,7 +22,6 @@ func main() {
 	err := godotenv.Load()
 	if err != nil {
 		slog.Error("Error loading .env file", "err", err)
-		os.Exit(-1)
 	}
 
 	addr := os.Getenv("ADDR")

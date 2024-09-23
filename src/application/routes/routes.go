@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/felipedavid/vrcursos/src/application/controllers"
+	"github.com/felipedavid/vrcursos/src/application/middlewares"
 )
 
 func DefineRoutes(userControllers *controllers.StudentController, courseControllers *controllers.CourseController) http.Handler {
@@ -24,5 +25,9 @@ func DefineRoutes(userControllers *controllers.StudentController, courseControll
 	mux.HandleFunc("POST /enroll/student/{studentID}/course/{courseID}", courseControllers.EnrollStudent)
 	mux.HandleFunc("DELETE /enroll/student/{studentID}/course/{courseID}", courseControllers.UnenrollStudent)
 
-	return mux
+	var handler http.Handler = mux
+
+	handler = middlewares.LogRequest(handler)
+
+	return handler
 }
