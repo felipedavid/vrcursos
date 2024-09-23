@@ -1,4 +1,15 @@
 services:
+  api:
+    build: .
+    container_name: vrcursos-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://api:123@db:5432/vrcourses?sslmode=disable
+      - ADDR=:3000
+
   db:
     image: postgres:16.4
     container_name: vrcursos-postgres

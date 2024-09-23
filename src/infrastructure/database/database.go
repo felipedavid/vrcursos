@@ -36,3 +36,18 @@ func RunUpMigrations(db *sql.DB, path string) error {
 	err = m.Up()
 	return err
 }
+
+func RunDownMigrations(db *sql.DB, path string) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(path, "postgres", driver)
+	if err != nil {
+		return err
+	}
+
+	err = m.Down()
+	return err
+}
